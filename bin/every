@@ -1,0 +1,108 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+# __FATPACK__
+
+use App::Every;
+
+App::Every->main( @ARGV );
+
+=pod
+
+=head1 NAME
+
+every - create and queue a cronjob
+
+=head1 SYNOPSIS
+
+Form: every [--help] [-n|--dry-run] [-l] ([num] unit)... program
+
+For example:
+
+    every day dosomething
+
+    every 3 hours dosomething
+
+    every @reboot dosomething
+
+=head1 DESCRIPTION
+
+Create and installs a crontab entry for you from a simple readable
+specifier.  To see what crontab the tool will create, pass just --dry-run or
+-n and it will print out the crontab entry without installing it.  Crontabs
+will be installed in the current user's crontab.  You can view them in the
+usual way (ie, crontab -l).
+
+Commands will always be run from the directory you were in when you ran
+every, so "./do_something" is perfectly valid.
+
+The "-l" command provides job locking, so that if your command hasn't exited
+by the time cron ticks again, you won't end up with second copy running.
+
+=head1 OPTIONS
+
+--help - Display this page.
+
+--dry-run
+
+-n     - Don't actually install the crontab
+
+-l     - Add locking so that more then one copy can't run at once
+
+num    - Number of the unit, defaults to 1
+
+unit   - Unit can be min(ute)(s), hour(s), day(s), week(s), month(s) or the
+name of a day of week, eg tue(sday).
+
+Or instead of a number plus a unit, you can pass in @daily, @weekly, @yearly
+or @reboot which will cause your command to be run every day, week, year or
+on reboot, respectively.
+
+=head1 JUSTIFICATION
+
+This is intended to be as easy to use as "at", but for recurring jobs rather
+then one-offs.  I'd found myself having a bad habit of running tasks in
+loops in my shell with sleeps, rather then creating cron entries-- this is
+intended to encourage me (and you!) to actually use cron.
+
+One major thing I'm likely to add, is to export some of your environment, in
+particular, your path.
+
+
+=head1 AUTHOR
+
+Rebecca Turner <becca@referencethis.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Rebecca Turner.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=head1 DISCLAIMER OF WARRANTY
+
+BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT
+WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER
+PARTIES PROVIDE THE SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND,
+EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE
+SOFTWARE IS WITH YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME
+THE COST OF ALL NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE LIABLE
+TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL, OR
+CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE
+SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES.
+
+=cut
+
