@@ -1,4 +1,4 @@
-# ABSTRACT: Create and queue a cronjob
+# ABSTRACT: Easily create and queue cronjobs from the command line
 package App::Every;
 use strict;
 use warnings;

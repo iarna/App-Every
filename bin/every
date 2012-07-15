@@ -12,7 +12,7 @@ App::Every->main( @ARGV );
 
 =head1 NAME
 
-every - create and queue a cronjob
+every - Easily create and queue cronjobs from the command line
 
 =head1 SYNOPSIS
 
