@@ -1,13 +1,3 @@
-#!/usr/bin/env perl
-use strict;
-use warnings;
-
-# __FATPACK__
-
-use App::Every;
-
-App::Every->main( @ARGV );
-
 =pod
 
 =head1 NAME
@@ -16,7 +6,7 @@ every - create and queue a cronjob
 
 =head1 SYNOPSIS
 
-Form: every [--help] [-n|--dry-run] [-l] ([num] unit)... [--] program
+Form: every [--help] [-n|--dry-run] [-l] ([num] unit)... program
 
 For example:
 
@@ -103,6 +93,7 @@ RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
 FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
 SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGES.
+
 
 =cut
 

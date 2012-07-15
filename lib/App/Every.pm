@@ -1,4 +1,4 @@
-# ABSTRACT: create and queue a cronjob
+# ABSTRACT: Create and queue a cronjob
 package App::Every;
 use strict;
 use warnings;
@@ -7,7 +7,7 @@ use Cwd;
 use Digest::MD5 qw( md5_hex );
 
 sub help {
-    warn "Form: $0 [--help] [-n|--dry-run] [-l] ([num] unit)... program\n";
+    warn "Form: $0 [--help] [-n|--dry-run] [-l] ([num] unit)... [--] program\n";
     warn "--help - Show the manpage for this command.\n";
     warn "-n     - Don't actually install the crontab\n";
     warn "num    - Number of the unit, defaults to 1\n";
@@ -21,7 +21,7 @@ sub help {
 =for future todo
 
 Update grammar to replace optional '--' with required 'do' to separate the
-program.  
+program.
 
 Later: Without 'do', behave like 'at' and read an ad-hoc script from stdin.
 Also: Small wrapper for 'at' that adds support for a 'do' argument, with a
@@ -35,15 +35,16 @@ If running as root, default to installing in, in order of preference:
     /etc/cron.<period> if available and appropriate
     /etc/cron.d if available
     /etc/crontab
-With --crontab option to install via the crontab command instead.
+
+With --user option to install via the crontab command instead.
 Likewise, --system option to try to install in the system crontab even if
-we're not root.
+we're not root(?) (with sudo?)
 
-    every day at 3pm program...
+    every day at 3pm do program...
 
-    every minute on Feb 03 at 3pm program...
-    
-    every day in march program...
+    every minute on Feb 03 at 3pm do program...
+
+    every day in march do program...
 
     at <time>
 
@@ -74,6 +75,14 @@ my %schedule = (
    day    => "*",
    month  => "*",
    dow    => "*" );
+
+
+=classmethod sub main( @args )
+
+Takes the same arguments as every commandline. Currently this isn't very
+useful, but it was a first step in pushing the implementation into a module.
+
+=cut
 
 sub main {
     my $class = shift;
@@ -181,3 +190,19 @@ sub main {
     }
 }
 1;
+
+=head1 SYNOPSIS
+
+    use App::Every;
+
+    App::Every->main( @ARGV );
+
+=head1 DESCRIPTION
+
+Creates and queues a cronjob, see L<every> for details.
+
+=head1 GETTING
+
+You can fetch a current release as a standalone script with:
+
+    curl -O https://raw.github.com/iarna/App-Every/master/packed/every
