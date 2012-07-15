@@ -2,7 +2,7 @@
 INSCRIPT=bin/every
 OUTSCRIPT=packed/every
 
-mkdir packed
+[ ! -d packed ] && mkdir packed
 
 fatpack tree $(fatpack packlists-for $(fatpack trace --to=- $INSCRIPT)) && \
 fatpack file > fatlib.pl 2>/dev/null && \
