@@ -8,7 +8,7 @@ BEGIN {
 my %fatpacked;
 
 $fatpacked{"App/Every.pm"} = <<'APP_EVERY';
-  # ABSTRACT: stuff things in cron
+  # ABSTRACT: Easily create and queue cronjobs from the command line
   package App::Every;
   {
     $App::Every::VERSION = '0.1.0';
@@ -20,20 +20,21 @@ $fatpacked{"App/Every.pm"} = <<'APP_EVERY';
   use Digest::MD5 qw( md5_hex );
   
   sub help {
-      warn "Form: $0 [-l] ([num] unit)... program\n";
-      warn "-l   - Add locking so that more then one copy can't run at once.\n";
+      warn "Form: $0 [--help] [-n|--dry-run] [-l] ([num] unit)... [--] program\n";
+      warn "--help - Show the manpage for this command.\n";
+      warn "-n     - Don't actually install the crontab\n";
+      warn "num    - Number of the unit, defaults to 1\n";
+      warn "unit   - min(ute)(s), hour(s), day(s), week(s), month(s)\n";
+      warn "         or the name of a day of week, eg tue(sday)\n";
+      warn "-l     - Add locking so that more then one copy can't run at once.\n";
       warn "--dry-run\n";
-      warn "-n   - Don't actually install the crontab\n";
-      warn "num  - Number of the unit, defaults to 1\n";
-      warn "unit - min(ute)(s), hour(s), day(s), week(s), month(s)\n";
-      warn "       or the name of a day of week, eg tue(sday)\n";
       exit(1);
   }
   
   =for future todo
   
   Update grammar to replace optional '--' with required 'do' to separate the
-  program.  
+  program.
   
   Later: Without 'do', behave like 'at' and read an ad-hoc script from stdin.
   Also: Small wrapper for 'at' that adds support for a 'do' argument, with a
@@ -47,15 +48,16 @@ $fatpacked{"App/Every.pm"} = <<'APP_EVERY';
       /etc/cron.<period> if available and appropriate
       /etc/cron.d if available
       /etc/crontab
-  With --crontab option to install via the crontab command instead.
+  
+  With --user option to install via the crontab command instead.
   Likewise, --system option to try to install in the system crontab even if
-  we're not root.
+  we're not root(?) (with sudo?)
   
-      every day at 3pm program...
+      every day at 3pm do program...
   
-      every minute on Feb 03 at 3pm program...
-      
-      every day in march program...
+      every minute on Feb 03 at 3pm do program...
+  
+      every day in march do program...
   
       at <time>
   
@@ -79,6 +81,7 @@ $fatpacked{"App/Every.pm"} = <<'APP_EVERY';
       mon   =>1, tue    =>2, wed      =>3, thu     =>4, fri   =>5, sat     =>6, sun   =>7,
       monday=>1, tuesday=>2, wednesday=>3, thursday=>4, friday=>5, saturday=>6, sunday=>7
       );
+  
   my %schedule = (
      minute => "*",
      hour   => "*",
@@ -86,12 +89,21 @@ $fatpacked{"App/Every.pm"} = <<'APP_EVERY';
      month  => "*",
      dow    => "*" );
   
+  
+  =classmethod sub main( @args )
+  
+  Takes the same arguments as every commandline. Currently this isn't very
+  useful, but it was a first step in pushing the implementation into a module.
+  
+  =cut
+  
   sub main {
       my $class = shift;
-      my $cwd = getcwd();
       my ($min,$hour,$day,$mon,$year,$dow) = (localtime())[1..6];
       my $lock    = 0;
       my $dry_run = 0;
+  
+      my %cronenv;
       my @program;
       while (@_) {
           my $amount = 1;
@@ -105,6 +117,9 @@ $fatpacked{"App/Every.pm"} = <<'APP_EVERY';
               }
               when ([qw( -n --dry-run )]) {
                   $dry_run = 1;
+              }
+              when (/^--help/) {
+                  exec("perldoc $0");
               }
               when (/^-/) {
                   help();
@@ -136,6 +151,7 @@ $fatpacked{"App/Every.pm"} = <<'APP_EVERY';
                   @schedule{qw( minute hour dow )} = ($min,$hour,$dow);
               }
               when (/^[@]week(ly)?$/) {
+                  die "Can't set an amount for a weekly entry\n" if $amount > 1;
                   @schedule{qw( minute hour day month dow )} = (q{@weekly}, q{}, q{}, q{}, q{});
               }
               when (\%monmap) {
@@ -162,25 +178,47 @@ $fatpacked{"App/Every.pm"} = <<'APP_EVERY';
       unless (@program) {
           help();
       }
-      unshift @program, qq[cd "$cwd"; ];
+  
+      unshift @program, q{cd "}.getcwd().q{"; };
+  
+      @cronenv{qw( PATH SHELL )} = @ENV{qw( PATH SHELL )};
   
       if ($lock) {
           my $lockfile = "/tmp/every_lock_" .
-             join '_',@schedule{qw( minute hour day month dow )}, @program;
-          @program = ("[ ! -f $lockfile -o ! -d /proc/\$(cat $lockfile 2>/dev/null) ] && ( echo \$\$ > $lockfile ;", @program, " ; rm $lockfile )");
+             md5_hex(join ' ',@schedule{sort keys %schedule}, @program);
+          $cronenv{'LOCKFILE'} = $lockfile;
+          @program = ('[ ! -f $LOCKFILE -o ! -d /proc/`[ -f $LOCKFILE ] && cat $LOCKFILE` ] && ( echo $$ > $LOCKFILE ;', @program, ' ; rm $LOCKFILE )');
       }
   
       my $crontab = join ' ',  @schedule{qw( minute hour day month dow )}, @program;
+      say "$_=$cronenv{$_}" for keys %cronenv;
       say $crontab;
   
       unless ($dry_run) {
           open my $cron, "|-", "crontab";
           print $cron qx{crontab -l 2> /dev/null};
+          say $cron "$_=$cronenv{$_}" for keys %cronenv;
           say $cron $crontab;
           close $cron;
       }
   }
   1;
+  
+  =head1 SYNOPSIS
+  
+      use App::Every;
+  
+      App::Every->main( @ARGV );
+  
+  =head1 DESCRIPTION
+  
+  Creates and queues a cronjob, see L<every> for details.
+  
+  =head1 GETTING
+  
+  You can fetch a current release as a standalone script with:
+  
+      curl -O https://raw.github.com/iarna/App-Every/master/packed/every
 APP_EVERY
 
 $fatpacked{"Digest/Perl/MD5.pm"} = <<'DIGEST_PERL_MD5';
