@@ -205,4 +205,8 @@ Creates and queues a cronjob, see L<every> for details.
 
 You can fetch a current release as a standalone script with:
 
-    curl -O https://raw.github.com/iarna/App-Every/master/packed/every
+    curl -O https://raw.github.com/iarna/App-Every/master/packed/every && chmod a+x every
+
+And then find out about it with:
+
+    ./every --help

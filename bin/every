@@ -35,7 +35,9 @@ will be installed in the current user's crontab.  You can view them in the
 usual way (ie, crontab -l).
 
 Commands will always be run from the directory you were in when you ran
-every, so "./do_something" is perfectly valid.
+every, so "./do_something" is perfectly valid.  Further, your path and shell
+will be maintained, so feel free to schedule shell commands, or things from
+your ~/bin or what not.
 
 The "-l" command provides job locking, so that if your command hasn't exited
 by the time cron ticks again, you won't end up with second copy running.
@@ -65,9 +67,6 @@ This is intended to be as easy to use as "at", but for recurring jobs rather
 then one-offs.  I'd found myself having a bad habit of running tasks in
 loops in my shell with sleeps, rather then creating cron entries-- this is
 intended to encourage me (and you!) to actually use cron.
-
-One major thing I'm likely to add, is to export some of your environment, in
-particular, your path.
 
 
 =head1 AUTHOR
