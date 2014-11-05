@@ -61,7 +61,7 @@ intended to encourage me (and you!) to actually use cron.
 
 =head1 AUTHOR
 
-Rebecca Turner <becca@referencethis.com>
+Rebecca Turner <me@re-becca.org>
 
 =head1 COPYRIGHT AND LICENSE
 
