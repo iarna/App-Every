@@ -4,6 +4,16 @@
 
 every - Easily create and queue cronjobs from the command line
 
+=head1 INSTALLING
+
+You can fetch a current release as a standalone script with:
+
+    curl -O https://raw.github.com/iarna/App-Every/master/packed/every && chmod a+x every
+
+And see these docs with:
+
+  ./every --help
+
 =head1 SYNOPSIS
 
 Form: every [--help] [-n|--dry-run] [-l] ([num] unit)... [--] program
